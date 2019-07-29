@@ -19,7 +19,7 @@ echo 1000 > ${CA_DIR}/serial
 
 sed -i "s/__DOMAIN__/$DOMAIN/g" ${CA_CONF}
 
-echo --- Generate Root Key & Certificate
+echo --- Generate Root Key and Certificate
 openssl req \
 -config ${CA_CONF} \
 -new -x509 -nodes -days 3650 \
