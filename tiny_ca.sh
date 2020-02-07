@@ -3,14 +3,14 @@
 DOMAIN=$1
 DAYS=3650 # 10yrs
 
-CA_TMP=./openssl-root.cnf.template
+CA_TMP=./ca.cnf.template
 CA_DIR=./ca/${DOMAIN}
 CA_PRE=./ca/${DOMAIN}/ca.${DOMAIN}
 CA_CNF=${CA_PRE}.cnf
 CA_KEY=${CA_PRE}.key.pem
 CA_CRT=${CA_PRE}.crt.pem
 CA_DER=${CA_PRE}.crt.der
-CA_SUB="/C=CA/ST=${DOMAIN}/O=${DOMAIN}/CN=root"
+CA_SUB="/C=CA/ST=${DOMAIN}/O=${DOMAIN}/CN=${DOMAIN}"
 
 SERIAL=1000
 
