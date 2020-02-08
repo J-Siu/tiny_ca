@@ -1,27 +1,30 @@
 ### Background
 
-As browsers are getting more secure and packed with more safeguards to prevent malicious actors from doing their biddings, they are becoming much less friendly with self-signed certificates. This become a pain in small lab and other wall-offed network. While using http for non-prod/testing can be the solution, it is not ideal and may create other issues.
+As browsers are getting more secure and packed with more safeguards to prevent malicious actors from doing their biddings, they become less friendly with self-signed certificates. This is a pain in small labs and other wall off networks. While using http for non-prod/testing can be a solution, it is not ideal and can create other issues.
 
 ### Goals
 
-- Create the simplest CA setup that can be recreated and throw away at wish.
+- Create the simplest CA setup that can be recreated and thrown away at wish.
 - Create one wildcard server certificate for any servers in the network.
 
 ### Fast Forward
 
-The result is a simple script with a openssl config file that will generate a CA and a wildcard certificate.
+The result is a simple script with an openssl config file that will generate a CA and a wildcard certificate.
+
+GitHub: [tiny_ca](https://github.com/J-Siu/tiny_ca)
 
 > ***WARNING:*** This is intended for testing/throw-away environment. Don't use it for production.
 
 #### Usage
 
-```zsh
+```sh
 git clone https://github.com/J-Siu/tiny_ca.git
 cd tiny_ca
+chmod u+x cert-gen.sh
 tiny_ca.sh <domain>
 ```
 
-#### Sample Output
+#### Output
 
 ```sh
 $ ./tiny_ca.sh local.local
@@ -86,8 +89,13 @@ Data Base Updated
 ./srv/wildcard.local.local.crt.der
 ```
 
-Install CA certificate into browser.
+Install CA certificate into browser or OS.
+
 Install server certificate and key into webserver.
+
+> **Notes**
+>
+> Most modern browsers will not accept wildcard certificate for TLD (top level domain). For example `*.local`, `*.com`, will not work.
 
 ### Changelog
 
@@ -97,6 +105,8 @@ Install server certificate and key into webserver.
   - Automatically generate der format for both ca and server cert.
   - Check if ca and server cert exist.
   - Remove OSCP and CRL extension from ca.cnf.template.
+- 1.1.0
+  - Incorporated ca config template into tiny_ca.sh.
 
 ### Reference
 
