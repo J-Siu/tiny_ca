@@ -3,6 +3,8 @@
 DOMAIN=$1
 DAYS=3650 # 10yrs
 
+SRV_DIR=./srv
+
 CA_DIR=./ca/${DOMAIN}
 CA_PRE=./ca/${DOMAIN}/ca.${DOMAIN}
 CA_CNF=${CA_PRE}.cnf
@@ -109,96 +111,101 @@ extendedKeyUsage = serverAuth
 
 SERIAL=1000
 
-SRV_DIR=./srv
-SRV_PRE=${SRV_DIR}/wildcard.${DOMAIN}
-SRV_KEY=${SRV_PRE}.key.pem
-SRV_CRT=${SRV_PRE}.crt.pem
-SRV_DER=${SRV_PRE}.crt.der
-SRV_CSR=${SRV_PRE}.csr.pem
-SRV_SUB="/C=CA/ST=${DOMAIN}/O=${DOMAIN}/CN=*.${DOMAIN}"
-
-function usage () {
-	if [[ "$DOMAIN" = '' ]]
-	then
+function usage() {
+	if [[ "$DOMAIN" = '' ]]; then
 		echo "Usage: cert-get.sh <domain>"
 		exit 1
 	fi
 }
 
-function ca_prep () {
+function ca_prep() {
 	echo --- Prepare directory
 	mkdir -p ${CA_DIR} ${CA_DIR}/crl ${CA_DIR}/certs ${CA_DIR}/new_certs ${SRV_DIR}
-	echo ${SERIAL} > ${CA_DIR}/serial
+	echo ${SERIAL} >${CA_DIR}/serial
 	touch ${CA_DIR}/index.txt
-	echo "${CA_TMP}" > ${CA_CNF}
+	echo "${CA_TMP}" >${CA_CNF}
 }
 
-function ca_gen () {
+function ca_gen() {
 	echo --- Generate Root Key and Certificate
 	openssl req \
-	-config ${CA_CNF} \
-	-new -x509 -nodes -days $DAYS \
-	-extensions v3_ca \
-	-keyout ${CA_KEY} \
-	-out ${CA_CRT} \
-	-subj ${CA_SUB}
+		-config ${CA_CNF} \
+		-new -x509 -nodes -days $DAYS \
+		-extensions v3_ca \
+		-keyout ${CA_KEY} \
+		-out ${CA_CRT} \
+		-subj ${CA_SUB}
 
 	# Create DER
 	openssl x509 -in ${CA_CRT} -outform der -out ${CA_DER}
 }
 
-function cert_gen () {
-	echo
-	echo --- Generate Server Key
-	openssl genrsa -out ${SRV_KEY} 2048
+function cert_gen() {
 
-	echo --- Generate Server CSR
-	openssl req -config ${CA_CNF} \
-	-key ${SRV_KEY} \
-	-new -sha256 -out ${SRV_CSR} \
-	-subj ${SRV_SUB}
+	_PRE=''
+	_SUB=''
+	if [[ "$1" = "wildcard" ]]; then
+		_PRE=${SRV_DIR}/wildcard.${DOMAIN}
+		_SUB="/C=CA/ST=${DOMAIN}/O=${DOMAIN}/CN=*.${DOMAIN}"
+	else
+		_PRE=${SRV_DIR}/${DOMAIN}
+		_SUB="/C=CA/ST=${DOMAIN}/O=${DOMAIN}/CN=${DOMAIN}"
+	fi
 
-	echo --- Generate Server Certificate
-	openssl ca -config ${CA_CNF} \
-	-extensions server_cert -days $DAYS -notext -md sha256 \
-	-in ${SRV_CSR} \
-	-out ${SRV_CRT} <<EOF
+	_KEY=${_PRE}.key.pem
+	_CRT=${_PRE}.crt.pem
+	_DER=${_PRE}.crt.der
+	_CSR=${_PRE}.csr.pem
+
+	if [ -f ${_CRT} ]; then
+		echo Certificate ${_CRT} exist!
+	else
+
+		echo
+		echo --- Generate Server Key
+		openssl genrsa -out ${_KEY} 2048
+
+		echo --- Generate Server CSR
+		openssl req -config ${CA_CNF} \
+			-key ${_KEY} \
+			-new -sha256 -out ${_CSR} \
+			-subj ${_SUB}
+
+		echo --- Generate Server Certificate
+		openssl ca -config ${CA_CNF} \
+			-extensions server_cert -days $DAYS -notext -md sha256 \
+			-in ${_CSR} \
+			-out ${_CRT} <<EOF
 y
 y
 EOF
 
-	# Create DER
-	openssl x509 -in ${SRV_CRT} -outform der -out ${SRV_DER}
+		# Create DER
+		openssl x509 -in ${_CRT} -outform der -out ${_DER}
+
+	fi
 }
 
-function info () {
+function info() {
 	echo
 	echo --- CA Certificate:
-	echo ${CA_CRT}
-	echo ${CA_DER}
+	ls -lh ${CA_DIR}/*${DOMAIN}*
 	echo --- Server Certificate:
-	echo ${SRV_KEY}
-	echo ${SRV_CRT}
-	echo ${SRV_DER}
+	ls -lh ${SRV_DIR}/*${DOMAIN}*
 }
 
 usage
 
-echo "${CA_TMP}"
+#echo "${CA_TMP}"
 
-if [ -f ${CA_CRT} ]
-then
+if [ -f ${CA_CRT} ]; then
 	echo ${DOMAIN} CA exist!
 else
 	ca_prep
 	ca_gen
 fi
 
-if [ -f ${SRV_CRT} ]
-then
-	echo Certificate ${SRV_CRT} exist!
-else
-	cert_gen
-fi
+cert_gen domain
+cert_gen wildcard
 
 info
