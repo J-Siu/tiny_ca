@@ -1,3 +1,21 @@
+# Tiny Certificate Authority [![Paypal donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?business=HZF49NM9D35SJ&no_recurring=0&currency_code=CAD)
+
+Bash script handling CA and certification creation.
+
+### Table Of Content
+<!-- TOC -->
+
+- [Background](#background)
+- [Goals](#goals)
+- [Fast Forward](#fast-forward)
+  - [Usage](#usage)
+  - [Output](#output)
+- [Install CA in Ubuntu](#install-ca-in-ubuntu)
+- [Changelog](#changelog)
+- [Reference](#reference)
+
+<!-- /TOC -->
+
 ### Background
 
 As browsers are getting more secure and packed with more safeguards to prevent malicious actors from doing their biddings, they become less friendly with self-signed certificates. This is a pain in small labs and other wall off networks. While using http for non-prod/testing can be a solution, it is not ideal and can create other issues.
