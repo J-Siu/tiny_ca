@@ -5,6 +5,7 @@ Bash script handling CA and certification creation.
 ### Table Of Content
 <!-- TOC -->
 
+- [Table Of Content](#table-of-content)
 - [Background](#background)
 - [Goals](#goals)
 - [Fast Forward](#fast-forward)
@@ -15,6 +16,7 @@ Bash script handling CA and certification creation.
 - [Reference](#reference)
 
 <!-- /TOC -->
+<!--more-->
 
 ### Background
 
